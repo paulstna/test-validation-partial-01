@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 public class BaggageFeeCalculator {
 
     private final PassengerService passengerService;
+    private final double COSTO_BASE = 30;
+    private final double RECARGO_EXTRA = 50;
 
     public BaggageFeeCalculator(PassengerService passengerService) {
         this.passengerService = passengerService;
@@ -34,7 +36,21 @@ public class BaggageFeeCalculator {
      * @throws IllegalArgumentException si los parámetros no cumplen las restricciones
      */
     public double calculateFee(double weight, int bagCount, Long passengerId) {
-        // TODO: Implementar lógica de negocio y validación de excepciones
-        return 0.0;
+        if (passengerId == null || weight <= 0 || bagCount < 1) {
+            throw new IllegalArgumentException("Parámetros de equipaje inválidos");
+        }
+
+        double fee = 0;
+        fee += bagCount * COSTO_BASE;
+        if ( weight > 23 ){
+            fee += RECARGO_EXTRA;
+        }
+
+        boolean isVip = passengerService.isVip(passengerId);
+        if (isVip && weight <= 23) {
+            fee -= COSTO_BASE;
+        }
+
+        return fee;
     }
 }
